@@ -1,27 +1,50 @@
-name: Build
+name: SonarQube Analysis
 
 on:
   push:
     branches:
-      - main
-
+      - "**" # This will trigger the workflow for all branches
+  pull_request:
+    branches:
+      - "**" # This will trigger the workflow for all pull requests
 
 jobs:
   build:
-    name: Build and analyze
+    name: Build and Analyze
     runs-on: ubuntu-latest
-    
+
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
         with:
-          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
-      - uses: sonarsource/sonarqube-scan-action@master
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-      # If you wish to fail your job when the Quality Gate is red, uncomment the
-      # following lines. This would typically be used to fail a deployment.
-      # - uses: sonarsource/sonarqube-quality-gate-action@master
-      #   timeout-minutes: 5
-      #   env:
-      #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          python-version: "3.9"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run tests and generate coverage report
+        run: |
+          pytest --cov=your_package --cov-report=xml
+
+      - name: Install SonarQube Scanner
+        uses: sonarsource/sonarcloud-action@v2
+        with:
+          sonar-token: ${{ secrets.SONARQUBE_TOKEN }}
+
+      - name: Run SonarQube Scanner
+        run: |
+          sonar-scanner \
+            -Dsonar.projectKey=Spare_Parts_Identification_Web \
+            -Dsonar.projectName=Spare_Parts_Identification_Web \
+            -Dsonar.sources=. \
+            -Dsonar.sourceEncoding=UTF-8 \
+            -Dsonar.host.url=http://localhost:9000
+            -Dsonar.login=${{ secrets.SONARQUBE_TOKEN }} \
+            -Dsonar.qualitygate.wait=false
+
+
