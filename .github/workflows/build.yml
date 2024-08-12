@@ -1,13 +1,3 @@
-name: SonarQube Analysis
-
-on:
-  push:
-    branches:
-      - "**" # This will trigger the workflow for all branches
-  pull_request:
-    branches:
-      - "**" # This will trigger the workflow for all pull requests
-
 jobs:
   build:
     name: Build and Analyze
@@ -32,19 +22,17 @@ jobs:
           pytest --cov=your_package --cov-report=xml
 
       - name: Install SonarQube Scanner
-        uses: sonarsource/sonarcloud-action@v2
-        with:
-          sonar-token: ${{ secrets.SONARQUBE_TOKEN }}
+        run: |
+          curl -sSLo sonar-scanner.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.6.2.2472-linux.zip
+          unzip sonar-scanner.zip
 
       - name: Run SonarQube Scanner
         run: |
-          sonar-scanner \
+          ./sonar-scanner-4.6.2.2472-linux/bin/sonar-scanner \
             -Dsonar.projectKey=Spare_Parts_Identification_Web \
             -Dsonar.projectName=Spare_Parts_Identification_Web \
             -Dsonar.sources=. \
             -Dsonar.sourceEncoding=UTF-8 \
-            -Dsonar.host.url=http://localhost:9000
+            -Dsonar.host.url=http://localhost:9000 \
             -Dsonar.login=${{ secrets.SONARQUBE_TOKEN }} \
             -Dsonar.qualitygate.wait=false
-
-
