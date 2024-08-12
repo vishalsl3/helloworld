@@ -20,8 +20,7 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-          - name: Test SonarQube Server Connection
-  run: curl -v ${{ secrets.SONAR_HOST_URL }}
+          
 
           
       # Optional: Uncomment to fail the job if the Quality Gate fails
